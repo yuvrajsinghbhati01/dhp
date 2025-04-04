@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Top Tags Trends</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Line graph of top 10 Stack Overflow Tags</h2>
+  <canvas id="chartCanvas" width="800" height="400"></canvas>
+
+  <script>
+    async function fetchChartData() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/data");
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const data = await response.json();
+
+        const years = data.years;
+        const datasets = data.tags.map(tag => ({
+          label: tag.name,
+          data: tag.counts,
+          borderColor: getRandomColor(),
+          backgroundColor: getRandomColor(),
+          fill: false
+        }));
+
+        const ctx = document.getElementById('chartCanvas').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: years,
+            datasets: datasets
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Trending Tags Over Years'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Percentage (%)'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Year'
+                }
+              }
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error("Error loading chart data:", err);
+      }
+    }
+
+    function getRandomColor() {
+      return `rgba(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)}, 0.8)`;
+    }
+
+    window.onload = fetchChartData;
+  </script>
+</body>
+</html>
